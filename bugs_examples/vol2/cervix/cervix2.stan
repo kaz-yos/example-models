@@ -38,9 +38,12 @@ model {
     wc[n] ~ bernoulli(phi[xc[n] + 1, dc[n] + 1]); 
   } 
   for (n in 1:Ni) {
-    // xi[n] ~ bernoulli(q); 
-    di[n] ~ bernoulli(inv_logit(beta0C + beta) * q + inv_logit(beta0C) * (1 - q)); 
-    wi[n] ~ bernoulli(phi[1, di[n] + 1] * (1 - q) + phi[2, di[n] + 1] * q); 
+    target += log_sum_exp(log(q) +
+                          bernoulli_lpmf(di[n] | inv_logit(beta0C + beta)) +
+                          bernoulli_lpmf(wi[n] | inv_logit(phi[1, di[n] + 1])),
+                          log(1-q) +
+                          bernoulli_lpmf(di[n] | inv_logit(beta0C + beta)) +
+                          bernoulli_lpmf(wi[n] | inv_logit(phi[2, di[n] + 1])))
   } 
   q ~ uniform(0, 1); 
   beta0C ~ normal(0, 320); 
